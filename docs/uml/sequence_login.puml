@@ -1,0 +1,54 @@
+@startuml Advanced Password Manager - Sequence Diagrams
+
+title User Login Sequence
+
+actor User
+participant LoginWindow
+participant SessionManager
+participant FernetEngine
+participant MySQLEngine
+participant Vault
+participant VaultWindow
+
+== User Login Flow ==
+
+User -> LoginWindow: Enter credentials
+LoginWindow -> MySQLEngine: read("users", {username})
+MySQLEngine --> LoginWindow: user_data (id, password_hash, salt)
+
+alt User found
+    LoginWindow -> FernetEngine: verify_password(input, stored_hash)
+    FernetEngine --> LoginWindow: verification_result
+    
+    alt Password correct
+        LoginWindow -> FernetEngine: derive_key(password, salt)
+        FernetEngine --> LoginWindow: master_key
+        
+        LoginWindow -> SessionManager: create_session(username)
+        SessionManager --> LoginWindow: session
+        
+        LoginWindow -> Vault: new Vault(session, db, crypto, master_key)
+        LoginWindow -> Vault: load_credentials()
+        Vault -> MySQLEngine: fetch_all("credentials", {user_id})
+        MySQLEngine --> Vault: encrypted_credentials
+        
+        loop For each credential
+            Vault -> FernetEngine: decrypt(encrypted_password, master_key)
+            FernetEngine --> Vault: plaintext_password
+            Vault -> Vault: add to BST
+            Vault -> Vault: add to HashTable
+            Vault -> Vault: update SecurityGraph
+        end
+        
+        LoginWindow -> VaultWindow: new VaultWindow(vault)
+        VaultWindow --> User: Show vault
+        
+        SessionManager -> SessionManager: start_auto_lock_timer()
+    else Password incorrect
+        LoginWindow --> User: Show error "Invalid credentials"
+    end
+else User not found
+    LoginWindow --> User: Show error "User not found"
+end
+
+@enduml

@@ -1,0 +1,369 @@
+@startuml Advanced Password Manager - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+package "Presentation Layer" {
+    abstract class BaseWindow {
+        - _root: Tk
+        - _title: str
+        - _theme: dict
+        + {abstract} setup(): void
+        + {abstract} create_widgets(): void
+        + show(): void
+        + hide(): void
+        + destroy(): void
+        + apply_theme(): void
+    }
+    
+    class LoginWindow {
+        - _username_entry: Entry
+        - _password_entry: Entry
+        - _db_engine: DatabaseEngine
+        - _crypto_engine: EncryptionEngine
+        + setup(): void
+        + create_widgets(): void
+        + login(): void
+        + register(): void
+        - _validate_credentials(): bool
+    }
+    
+    class VaultWindow {
+        - _vault: Vault
+        - _credentials_tree: Treeview
+        - _search_entry: Entry
+        - _clipboard_manager: ClipboardManager
+        + setup(): void
+        + create_widgets(): void
+        + add_credential(): void
+        + edit_credential(): void
+        + delete_credential(): void
+        + copy_password(): void
+        + search(): void
+        + show_security_graph(): void
+    }
+    
+    class SecurityGraphWindow {
+        - _graph: SecurityGraph
+        - _figure: Figure
+        - _canvas: FigureCanvasTkAgg
+        + setup(): void
+        + create_widgets(): void
+        + draw_graph(): void
+        + highlight_reuse(): void
+    }
+    
+    BaseWindow <|-- LoginWindow
+    BaseWindow <|-- VaultWindow
+    BaseWindow <|-- SecurityGraphWindow
+}
+
+package "Core Layer" {
+    class Credential {
+        - _id: int
+        - _website: str
+        - _username: str
+        - _encrypted_password: bytes
+        - _notes: str
+        - _created_at: datetime
+        - _updated_at: datetime
+        - _password_history: PasswordHistory
+        + website: str <<property>>
+        + username: str <<property>>
+        + to_dict(): dict
+        + from_dict(data: dict): Credential
+        - _validate_website(value: str): void
+    }
+    
+    class PasswordPolicy {
+        - _min_length: int
+        - _require_uppercase: bool
+        - _require_lowercase: bool
+        - _require_digits: bool
+        - _require_special: bool
+        + validate(password: str): tuple[bool, list]
+        + calculate_strength(password: str): int
+        + generate_password(length: int): str
+        - _check_entropy(password: str): float
+    }
+    
+    class Session {
+        - _user_id: int
+        - _username: str
+        - _created_at: datetime
+        - _last_activity: datetime
+        - _is_locked: bool
+        + user_id: int <<property>>
+        + is_locked: bool <<property>>
+        + update_activity(): void
+        + lock(): void
+        + unlock(): void
+    }
+    
+    class SessionManager {
+        - _current_session: Session
+        - _auto_lock_timer: AutoLockTimer
+        - _on_lock_callback: Callable
+        + create_session(username: str): Session
+        + destroy_session(): void
+        + lock_session(): void
+        + start_auto_lock_timer(): void
+        + reset_activity(): void
+    }
+    
+    class Vault {
+        - _session: Session
+        - _db_engine: DatabaseEngine
+        - _crypto_engine: EncryptionEngine
+        - _master_key: bytes
+        - _credential_tree: BST
+        - _password_hashes: HashTable
+        - _security_graph: SecurityGraph
+        + load_credentials(): void
+        + add_credential(cred: Credential): int
+        + update_credential(cred: Credential): bool
+        + delete_credential(id: int): bool
+        + search(query: str): list[Credential]
+        + get_security_analysis(): dict
+        + backup(path: str): bool
+        + restore(path: str): bool
+    }
+    
+    Vault --> Session
+    Vault --> Credential
+    SessionManager --> Session
+    Credential --> PasswordPolicy
+}
+
+package "Crypto Layer" {
+    abstract class EncryptionEngine {
+        + {abstract} derive_key(password: str, salt: bytes): bytes
+        + {abstract} encrypt(plaintext: str, key: bytes): bytes
+        + {abstract} decrypt(ciphertext: bytes, key: bytes): str
+        + {abstract} hash_password(password: str): str
+        + {abstract} verify_password(password: str, hash: str): bool
+        + {abstract} generate_salt(): bytes
+    }
+    
+    class FernetEngine {
+        - _iterations: int = 100000
+        + derive_key(password: str, salt: bytes): bytes
+        + encrypt(plaintext: str, key: bytes): bytes
+        + decrypt(ciphertext: bytes, key: bytes): str
+        + hash_password(password: str): str
+        + verify_password(password: str, hash: str): bool
+        + generate_salt(): bytes
+    }
+    
+    EncryptionEngine <|-- FernetEngine
+}
+
+package "Storage Layer" {
+    abstract class DatabaseEngine {
+        + {abstract} connect(): bool
+        + {abstract} disconnect(): void
+        + {abstract} initialize_schema(): void
+        + {abstract} create(table: str, data: dict): int
+        + {abstract} read(table: str, conditions: dict): dict
+        + {abstract} update(table: str, data: dict, conditions: dict): bool
+        + {abstract} delete(table: str, conditions: dict): bool
+        + {abstract} execute(query: str, params: tuple): any
+    }
+    
+    class MySQLEngine {
+        - _host: str
+        - _port: int
+        - _user: str
+        - _password: str
+        - _database: str
+        - _connection: Connection
+        - _pool: ConnectionPool
+        + connect(): bool
+        + disconnect(): void
+        + initialize_schema(): void
+        + create(table: str, data: dict): int
+        + read(table: str, conditions: dict): dict
+        + update(table: str, data: dict, conditions: dict): bool
+        + delete(table: str, conditions: dict): bool
+    }
+    
+    class BackupManager {
+        - _crypto_engine: EncryptionEngine
+        + backup(credentials: list, path: str, key: bytes): bool
+        + restore(path: str, key: bytes): list
+        - _compress(data: bytes): bytes
+        - _decompress(data: bytes): bytes
+    }
+    
+    DatabaseEngine <|-- MySQLEngine
+    BackupManager --> EncryptionEngine
+}
+
+package "OS Layer" {
+    class ManagedThread {
+        - _name: str
+        - _target: Callable
+        - _stop_event: Event
+        - _thread: Thread
+        + start(): void
+        + stop(): void
+        + join(timeout: float): void
+        + is_alive(): bool
+    }
+    
+    class ThreadManager {
+        - _threads: dict[str, ManagedThread]
+        + add_thread(name: str, target: Callable): void
+        + start_thread(name: str): void
+        + stop_thread(name: str): void
+        + start_all(): void
+        + stop_all(): void
+        + get_thread_count(): int
+    }
+    
+    class AutoLockTimer {
+        - _timeout: int
+        - _callback: Callable
+        - _timer: Timer
+        + start(): void
+        + stop(): void
+        + reset(): void
+    }
+    
+    class ClipboardManager {
+        - _clear_timeout: int
+        - _clear_timer: Timer
+        + copy(text: str): void
+        + get(): str
+        + clear(): void
+        + copy_with_auto_clear(text: str): void
+        + shutdown(): void
+    }
+    
+    class FileLock {
+        - _lock_file: str
+        - _fd: int
+        - _is_locked: bool
+        + acquire(): bool
+        + release(): void
+        + is_locked(): bool
+    }
+    
+    class SingleInstanceGuard {
+        - _lock: FileLock
+        + acquire(): bool
+        + release(): void
+    }
+    
+    ThreadManager --> ManagedThread
+    SingleInstanceGuard --> FileLock
+}
+
+package "Data Structures Layer" {
+    class BSTNode {
+        + key: any
+        + value: any
+        + left: BSTNode
+        + right: BSTNode
+    }
+    
+    class BST {
+        - _root: BSTNode
+        - _size: int
+        + insert(key: any, value: any): void
+        + search(key: any): any
+        + delete(key: any): void
+        + prefix_search(prefix: str): list
+        + inorder(): Generator
+        + find_min(): tuple
+        + find_max(): tuple
+    }
+    
+    class HashTable {
+        - _buckets: list[list]
+        - _size: int
+        - _capacity: int
+        + put(key: any, value: any): void
+        + get(key: any): any
+        + remove(key: any): bool
+        + contains(key: any): bool
+        - _hash(key: any): int
+        - _resize(): void
+    }
+    
+    class Graph {
+        - _adjacency: dict
+        - _vertices: set
+        + add_vertex(v: any): void
+        + add_edge(v1: any, v2: any): void
+        + remove_edge(v1: any, v2: any): void
+        + get_neighbors(v: any): list
+        + bfs(start: any): Generator
+        + dfs(start: any): Generator
+        + get_connected_components(): list
+    }
+    
+    class SecurityGraph {
+        - _password_edges: dict
+        + add_password_edge(v1: any, v2: any, hash: str): void
+        + get_sites_with_shared_password(hash: str): list
+        + get_risk_score(vertex: any): float
+    }
+    
+    class PasswordReuseAnalyzer {
+        - _graph: SecurityGraph
+        + analyze(credentials: list): dict
+        + get_recommendations(): list
+        + get_risk_summary(): dict
+    }
+    
+    class Node {
+        + data: any
+        + next: Node
+        + prev: Node
+    }
+    
+    class LinkedList {
+        - _head: Node
+        - _tail: Node
+        - _size: int
+        + append(data: any): void
+        + prepend(data: any): void
+        + remove(data: any): bool
+        + get(index: int): any
+    }
+    
+    class PasswordHistory {
+        - _history: LinkedList
+        - _max_size: int
+        + add_password(hash: str): void
+        + was_used(hash: str): bool
+        + get_history(): list
+    }
+    
+    BST --> BSTNode
+    LinkedList --> Node
+    Graph <|-- SecurityGraph
+    PasswordReuseAnalyzer --> SecurityGraph
+    PasswordHistory --> LinkedList
+}
+
+' Relationships between packages
+Vault --> BST
+Vault --> HashTable
+Vault --> SecurityGraph
+Vault --> DatabaseEngine
+Vault --> EncryptionEngine
+LoginWindow --> DatabaseEngine
+LoginWindow --> EncryptionEngine
+VaultWindow --> Vault
+VaultWindow --> ClipboardManager
+SecurityGraphWindow --> SecurityGraph
+SessionManager --> AutoLockTimer
+Credential --> PasswordHistory
+
+@enduml

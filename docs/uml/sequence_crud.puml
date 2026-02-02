@@ -1,0 +1,91 @@
+@startuml Advanced Password Manager - Credential Operations
+
+title Credential CRUD Operations
+
+== Add Credential ==
+
+actor User
+participant VaultWindow
+participant Vault
+participant PasswordPolicy
+participant FernetEngine
+participant BST
+participant HashTable
+participant SecurityGraph
+participant MySQLEngine
+
+User -> VaultWindow: Click "Add Credential"
+VaultWindow -> VaultWindow: show_add_dialog()
+User -> VaultWindow: Enter website, username, password
+
+VaultWindow -> PasswordPolicy: validate(password)
+PasswordPolicy --> VaultWindow: (is_valid, errors)
+
+alt Password valid
+    VaultWindow -> PasswordPolicy: calculate_strength(password)
+    PasswordPolicy --> VaultWindow: strength_score
+    
+    VaultWindow -> Vault: add_credential(credential)
+    Vault -> FernetEngine: encrypt(password, master_key)
+    FernetEngine --> Vault: encrypted_password
+    
+    Vault -> MySQLEngine: create("credentials", {...})
+    MySQLEngine --> Vault: credential_id
+    
+    Vault -> BST: insert(website, credential)
+    Vault -> HashTable: put(password_hash, [credential_id])
+    Vault -> SecurityGraph: check_and_add_reuse_edges()
+    
+    Vault --> VaultWindow: success
+    VaultWindow --> User: Show "Credential saved"
+else Password invalid
+    VaultWindow --> User: Show validation errors
+end
+
+== Search Credentials ==
+
+User -> VaultWindow: Type in search box
+VaultWindow -> Vault: search(query)
+Vault -> BST: prefix_search(query)
+BST --> Vault: matching_credentials
+Vault --> VaultWindow: filtered_list
+VaultWindow --> User: Update display
+
+== Copy Password ==
+
+User -> VaultWindow: Click "Copy Password"
+VaultWindow -> Vault: get_credential(id)
+Vault -> FernetEngine: decrypt(encrypted_pass, key)
+FernetEngine --> Vault: plaintext_password
+Vault --> VaultWindow: credential with password
+
+VaultWindow -> ClipboardManager: copy_with_auto_clear(password)
+ClipboardManager -> ClipboardManager: copy(password)
+ClipboardManager -> ClipboardManager: start_clear_timer(30s)
+ClipboardManager --> VaultWindow: success
+
+VaultWindow --> User: Show "Password copied (30s)"
+
+note over ClipboardManager
+    After 30 seconds,
+    clipboard is cleared
+    automatically
+end note
+
+== Delete Credential ==
+
+User -> VaultWindow: Click "Delete"
+VaultWindow -> VaultWindow: confirm_dialog()
+User -> VaultWindow: Confirm
+
+VaultWindow -> Vault: delete_credential(id)
+Vault -> BST: delete(website)
+Vault -> HashTable: remove_from_list(password_hash, id)
+Vault -> SecurityGraph: remove_edges(website)
+Vault -> MySQLEngine: delete("credentials", {id})
+MySQLEngine --> Vault: success
+
+Vault --> VaultWindow: success
+VaultWindow --> User: Refresh display
+
+@enduml

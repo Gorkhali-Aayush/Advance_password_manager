@@ -1,0 +1,93 @@
+@startuml Advanced Password Manager - Security Analysis
+
+title Password Reuse Detection and Graph Analysis
+
+== Security Analysis Flow ==
+
+actor User
+participant VaultWindow
+participant Vault
+participant PasswordReuseAnalyzer
+participant SecurityGraph
+participant Graph
+participant SecurityGraphWindow
+
+User -> VaultWindow: Click "Security Analysis"
+VaultWindow -> Vault: get_security_analysis()
+
+Vault -> PasswordReuseAnalyzer: analyze(all_credentials)
+
+PasswordReuseAnalyzer -> PasswordReuseAnalyzer: group_by_password_hash()
+
+loop For each password hash with multiple sites
+    PasswordReuseAnalyzer -> SecurityGraph: add_password_edge(site1, site2, hash)
+end
+
+PasswordReuseAnalyzer -> Graph: get_connected_components()
+
+note over Graph
+    BFS traversal finds
+    connected components
+    (password reuse groups)
+end note
+
+Graph -> Graph: bfs() for each unvisited vertex
+
+Graph --> PasswordReuseAnalyzer: components_list
+
+loop For each component (reuse group)
+    PasswordReuseAnalyzer -> PasswordReuseAnalyzer: calculate_risk_score()
+end
+
+PasswordReuseAnalyzer --> Vault: analysis_report
+
+Vault --> VaultWindow: security_data
+
+VaultWindow -> SecurityGraphWindow: new SecurityGraphWindow(graph)
+
+SecurityGraphWindow -> SecurityGraphWindow: create_matplotlib_figure()
+SecurityGraphWindow -> SecurityGraphWindow: draw_nodes_with_colors()
+
+note over SecurityGraphWindow
+    Colors indicate risk level:
+    - Green: No reuse (safe)
+    - Yellow: Minor reuse (warning)
+    - Red: Critical reuse (danger)
+end note
+
+SecurityGraphWindow --> User: Display graph visualization
+
+== DFS for Path Finding ==
+
+User -> SecurityGraphWindow: Click on node
+SecurityGraphWindow -> SecurityGraph: dfs(selected_node)
+
+SecurityGraph -> SecurityGraph: recursive_dfs()
+
+note over SecurityGraph
+    DFS explores all paths
+    from selected node to
+    find all related sites
+end note
+
+SecurityGraph --> SecurityGraphWindow: connected_sites
+
+SecurityGraphWindow -> SecurityGraphWindow: highlight_connected()
+SecurityGraphWindow --> User: Show related sites
+
+== Recommendations Generation ==
+
+PasswordReuseAnalyzer -> PasswordReuseAnalyzer: get_recommendations()
+
+note over PasswordReuseAnalyzer
+    Generate recommendations:
+    1. "Change password for gmail.com"
+       (shared with 3 other sites)
+    2. "Consider unique passwords for
+       financial sites"
+end note
+
+PasswordReuseAnalyzer --> VaultWindow: recommendations_list
+VaultWindow --> User: Display recommendations
+
+@enduml
