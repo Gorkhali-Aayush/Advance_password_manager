@@ -9,6 +9,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from abc import ABC, abstractmethod
 from typing import Optional, Callable, Dict, Any
+from .theme import ThemeManager, get_theme
 
 
 class BaseWindow(ABC):
@@ -25,20 +26,6 @@ class BaseWindow(ABC):
     - Lifecycle management
     - Event handling patterns
     """
-    
-    # Application-wide theme colors
-    COLORS = {
-        'primary': '#2196F3',
-        'primary_dark': '#1976D2',
-        'secondary': '#4CAF50',
-        'background': '#FAFAFA',
-        'surface': '#FFFFFF',
-        'error': '#F44336',
-        'warning': '#FF9800',
-        'text_primary': '#212121',
-        'text_secondary': '#757575',
-        'border': '#E0E0E0'
-    }
     
     # Default window dimensions
     DEFAULT_WIDTH = 800
@@ -116,10 +103,9 @@ class BaseWindow(ABC):
     
     def _setup_theme(self) -> None:
         """Configure ttk styles for consistent theming."""
-        style = ttk.Style()
-        
-        # Configure common styles
-        style.configure('TFrame', background=self.COLORS['background'])
+        theme = get_theme()
+        theme.configure_styles(self._root)
+        self._root.configure(bg=theme.COLORS['background'])
         
         style.configure('TLabel',
             background=self.COLORS['background'],
@@ -139,26 +125,95 @@ class BaseWindow(ABC):
         
         style.configure('TButton',
             font=('Segoe UI', 10),
-            padding=(10, 5)
+            padding=(12, 8)
         )
         
         style.configure('Primary.TButton',
             background=self.COLORS['primary'],
-            foreground='white'
+            foreground='white',
+            relief='flat',
+            padding=(12, 8),
+            font=('Segoe UI', 10, 'bold')
+        )
+        
+        style.configure('Success.TButton',
+            background=self.COLORS['success'],
+            foreground='white',
+            relief='flat',
+            padding=(12, 8),
+            font=('Segoe UI', 10, 'bold')
+        )
+        
+        style.configure('Danger.TButton',
+            background=self.COLORS['error'],
+            foreground='white',
+            relief='flat',
+            padding=(12, 8),
+            font=('Segoe UI', 10, 'bold')
+        )
+        
+        style.configure('Secondary.TButton',
+            background=self.COLORS['secondary'],
+            foreground='white',
+            relief='flat',
+            padding=(12, 8),
+            font=('Segoe UI', 10)
         )
         
         style.configure('TEntry',
-            padding=5,
-            font=('Segoe UI', 10)
+            padding=10,
+            font=('Segoe UI', 11),
+            relief='flat',
+            borderwidth=1
+        )
+        
+        style.configure('TLabel',
+            font=('Segoe UI', 10),
+            background=self.COLORS['background'],
+            foreground=self.COLORS['text_primary']
+        )
+        
+        style.configure('Title.TLabel',
+            font=('Segoe UI', 20, 'bold'),
+            background=self.COLORS['background'],
+            foreground=self.COLORS['primary']
+        )
+        
+        style.configure('Subtitle.TLabel',
+            font=('Segoe UI', 11),
+            background=self.COLORS['background'],
+            foreground=self.COLORS['text_secondary']
+        )
+        
+        style.configure('Heading.TLabel',
+            font=('Segoe UI', 14, 'bold'),
+            background=self.COLORS['surface'],
+            foreground=self.COLORS['primary']
         )
         
         style.configure('Treeview',
             font=('Segoe UI', 10),
-            rowheight=30
+            rowheight=35,
+            background=self.COLORS['surface'],
+            foreground=self.COLORS['text_primary'],
+            fieldbackground=self.COLORS['surface'],
+            relief='flat',
+            borderwidth=1
         )
         
         style.configure('Treeview.Heading',
-            font=('Segoe UI', 10, 'bold')
+            font=('Segoe UI', 11, 'bold'),
+            background=self.COLORS['primary_light'],
+            foreground=self.COLORS['primary']
+        )
+        
+        style.map('Treeview',
+            background=[('selected', self.COLORS['primary'])],
+            foreground=[('selected', 'white')]
+        )
+        
+        style.configure('TFrame',
+            background=self.COLORS['background']
         )
         
         # Configure root background
