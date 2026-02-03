@@ -15,15 +15,15 @@ import logging
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.credential import Credential
-from core.session_manager import get_session_manager, SessionManager
-from core.password_policy import get_password_policy, PasswordPolicy, PasswordStrength
+from core.sessionManager import get_session_manager, SessionManager
+from core.passwordPolicy import get_password_policy, PasswordPolicy, PasswordStrength
 from datastructures.bst import BinarySearchTree
 from datastructures.hashtable import HashTable, generate_composite_key
 from datastructures.graph import PasswordReuseAnalyzer
-from datastructures.linked_list import PasswordHistory
-from crypto.fernet_engine import get_encryption_engine, FernetEngine
-from storage.mysql_engine import get_database, MySQLEngine
-from storage.backup_file import get_backup_handler, BackupFile
+from datastructures.linkedList import PasswordHistory
+from crypto.fernetEngine import get_encryption_engine, FernetEngine
+from storage.mysqlEngine import get_database, MySQLEngine
+from storage.backupFile import get_backup_handler, BackupFile
 
 logger = logging.getLogger(__name__)
 

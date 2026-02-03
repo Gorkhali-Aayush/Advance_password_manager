@@ -5,15 +5,15 @@ Provides OS-level functionality including threading,
 clipboard management, and file locking.
 """
 
-from .thread_manager import (
+from .threadManager import (
     ThreadManager,
     ManagedThread,
     ThreadState,
     AutoLockTimer,
     get_thread_manager
 )
-from .clipboard_manager import ClipboardManager, get_clipboard_manager
-from .file_lock import FileLock, SingleInstanceGuard, get_instance_guard
+from .clipboardManager import ClipboardManager, get_clipboard_manager
+from .fileLock import FileLock, SingleInstanceGuard, get_instance_guard
 
 __all__ = [
     'ThreadManager',

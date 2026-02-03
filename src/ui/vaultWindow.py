@@ -20,12 +20,12 @@ logger = logging.getLogger(__name__)
 # Add parent directory to path for cross-package imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ui.base_window import BaseWindow
+from ui.baseWindow import BaseWindow
 from core.vault import get_vault, Vault
 from core.credential import Credential
-from core.session_manager import get_session_manager
-from os_layer.clipboard_manager import get_clipboard_manager
-from storage.mysql_engine import get_database
+from core.sessionManager import get_session_manager
+from os_layer.clipboardManager import get_clipboard_manager
+from storage.mysqlEngine import get_database
 
 
 class VaultWindow(BaseWindow):
@@ -157,7 +157,7 @@ class VaultWindow(BaseWindow):
     
     def _build_admin_dashboard_in_tab(self, parent: ttk.Frame) -> None:
         """Build the admin dashboard inside a tab frame."""
-        from ui.admin_dashboard import AdminDashboard
+        from ui.adminDashboard import AdminDashboard
         
         # We'll create a lightweight admin view in this frame
         # Header
@@ -176,7 +176,7 @@ class VaultWindow(BaseWindow):
         self._admin_notebook = admin_notebook
         
         # Import here to avoid circular imports
-        from storage.mysql_engine import get_database
+        from storage.mysqlEngine import get_database
         
         db = get_database()
         
@@ -300,7 +300,7 @@ class VaultWindow(BaseWindow):
     def _refresh_admin_dashboard(self) -> None:
         """Refresh admin dashboard data."""
         try:
-            from storage.mysql_engine import get_database
+            from storage.mysqlEngine import get_database
             db = get_database()
             
             # Refresh all admin panels
@@ -401,7 +401,7 @@ class VaultWindow(BaseWindow):
         user_id, username = values[0], values[1]
         
         # Require admin authentication
-        from ui.admin_auth_dialog import AdminAuthDialog
+        from ui.adminAuthDialog import AdminAuthDialog
         if not AdminAuthDialog.authenticate(
             parent=self._root,
             operation=f"Promote user '{username}' to admin role"
@@ -427,7 +427,7 @@ class VaultWindow(BaseWindow):
         user_id, username = values[0], values[1]
         
         # Require admin authentication
-        from ui.admin_auth_dialog import AdminAuthDialog
+        from ui.adminAuthDialog import AdminAuthDialog
         if not AdminAuthDialog.authenticate(
             parent=self._root,
             operation=f"Demote user '{username}' to regular user role"
@@ -897,7 +897,7 @@ class VaultWindow(BaseWindow):
     
     def _on_security_click(self) -> None:
         """Show advanced security analysis panel."""
-        from .security_panel import AdvancedSecurityPanel
+        from .securityPanel import AdvancedSecurityPanel
         logger.info("Opening Advanced Security Panel...")
         AdvancedSecurityPanel(self._root)
         self._session.update_activity()

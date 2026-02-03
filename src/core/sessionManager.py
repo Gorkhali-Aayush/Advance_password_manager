@@ -16,9 +16,9 @@ from enum import Enum
 # Add parent directory to path for cross-package imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from os_layer.thread_manager import AutoLockTimer, get_thread_manager
-from os_layer.clipboard_manager import get_clipboard_manager
-from crypto.fernet_engine import get_encryption_engine
+from os_layer.threadManager import AutoLockTimer, get_thread_manager
+from os_layer.clipboardManager import get_clipboard_manager
+from crypto.fernetEngine import get_encryption_engine
 
 
 class SessionState(Enum):

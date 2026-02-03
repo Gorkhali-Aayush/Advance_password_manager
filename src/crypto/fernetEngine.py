@@ -15,7 +15,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 
-from .encryption_base import EncryptionEngine
+from .encryptionBase import EncryptionEngine
 
 
 class FernetEngine(EncryptionEngine):

@@ -42,16 +42,17 @@ from typing import Optional
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import application components (use same import paths as other modules)
-from storage.mysql_engine import MySQLEngine, set_database
-from crypto.fernet_engine import FernetEngine, set_encryption_engine
-from core.session_manager import SessionManager, Session, set_session_manager, get_session_manager
+from config import get_config
+from storage.mysqlEngine import MySQLEngine, set_database
+from crypto.fernetEngine import FernetEngine, set_encryption_engine
+from core.sessionManager import SessionManager, Session, set_session_manager, get_session_manager
 from core.vault import Vault
-from core.password_policy import PasswordPolicy
-from os_layer.file_lock import SingleInstanceGuard
-from os_layer.thread_manager import ThreadManager
-from os_layer.clipboard_manager import ClipboardManager
-from ui.login_window import LoginWindow
-from ui.vault_window import VaultWindow
+from core.passwordPolicy import PasswordPolicy
+from os_layer.fileLock import SingleInstanceGuard
+from os_layer.threadManager import ThreadManager
+from os_layer.clipboardManager import ClipboardManager
+from ui.loginWindow import LoginWindow
+from ui.vaultWindow import VaultWindow
 
 # Ensure backups directory exists
 import pathlib
@@ -114,11 +115,16 @@ class PasswordManagerApp:
     # Application settings
     APP_NAME = "Advanced Password Manager"
     LOCK_FILE = "password_manager.lock"
-    AUTO_LOCK_TIMEOUT = 300  # 5 minutes
-    CLIPBOARD_CLEAR_TIMEOUT = 30  # 30 seconds
     
     def __init__(self):
         """Initialize the Password Manager application."""
+        # Load configuration
+        config = get_config()
+        self.DB_CONFIG = config.get_db_config()
+        self.AUTO_LOCK_TIMEOUT = config.get('AUTO_LOCK_TIMEOUT')
+        self.CLIPBOARD_CLEAR_TIMEOUT = config.get('CLIPBOARD_CLEAR_TIMEOUT')
+        
+        logger.info(f"Configuration loaded: {config}")
         logger.info("Initializing Password Manager Application...")
         
         # Component references (initialized in _initialize_components)

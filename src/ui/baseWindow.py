@@ -184,6 +184,9 @@ class BaseWindow(ABC):
     
     def _on_close(self) -> None:
         """Handle window close event."""
+        if not self._is_open:
+            return  # Already closed, prevent double-close
+        
         self._is_open = False
         
         if self._on_close_callback:
@@ -192,7 +195,11 @@ class BaseWindow(ABC):
             except Exception as e:
                 print(f"Close callback error: {e}")
         
-        self._root.destroy()
+        try:
+            self._root.destroy()
+        except tk.TclError:
+            # Window already destroyed
+            pass
     
     def show(self) -> None:
         """Show the window."""

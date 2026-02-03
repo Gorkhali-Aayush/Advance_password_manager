@@ -1,0 +1,4 @@
+# Ignore Pylance diagnostics for test files
+# Tests use sys.path.insert() which Pylance can't analyze statically
+# But all imports work correctly at runtime (verified by test execution)
+tests/

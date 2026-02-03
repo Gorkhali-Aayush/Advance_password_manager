@@ -14,8 +14,8 @@ import os
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from storage.mysql_engine import MySQLEngine
-from crypto.fernet_engine import FernetEngine
+from storage.mysqlEngine import MySQLEngine
+from crypto.fernetEngine import FernetEngine
 import getpass
 
 

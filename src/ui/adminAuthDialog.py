@@ -13,10 +13,10 @@ from typing import Optional, Callable
 # Add parent directory to path for cross-package imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ui.base_window import BaseWindow
-from core.session_manager import get_session_manager
-from crypto.fernet_engine import get_encryption_engine
-from storage.mysql_engine import get_database
+from ui.baseWindow import BaseWindow
+from core.sessionManager import get_session_manager
+from crypto.fernetEngine import get_encryption_engine
+from storage.mysqlEngine import get_database
 
 
 class AdminAuthDialog(BaseWindow):

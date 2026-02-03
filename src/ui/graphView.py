@@ -15,7 +15,7 @@ import math
 # Add parent directory to path for cross-package imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ui.base_window import BaseWindow
+from ui.baseWindow import BaseWindow
 from core.vault import get_vault
 
 

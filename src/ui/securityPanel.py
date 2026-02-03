@@ -27,10 +27,10 @@ from datetime import datetime
 # Add parent directory to path for cross-package imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ui.base_window import BaseWindow
+from ui.baseWindow import BaseWindow
 from core.vault import get_vault
-from core.security_analyzer import get_security_analyzer, SecurityReport, PasswordAnalysis
-from os_layer.clipboard_manager import get_clipboard_manager
+from core.securityAnalyzer import get_security_analyzer, SecurityReport, PasswordAnalysis
+from os_layer.clipboardManager import get_clipboard_manager
 
 logger = logging.getLogger(__name__)
 

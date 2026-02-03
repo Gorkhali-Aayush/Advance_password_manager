@@ -18,10 +18,10 @@ from datetime import datetime
 # Add parent directory to path for cross-package imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ui.base_window import BaseWindow
-from ui.admin_auth_dialog import AdminAuthDialog
+from ui.baseWindow import BaseWindow
+from ui.adminAuthDialog import AdminAuthDialog
 from core.vault import get_vault
-from storage.mysql_engine import get_database
+from storage.mysqlEngine import get_database
 
 logger = logging.getLogger(__name__)
 

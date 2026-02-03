@@ -6,13 +6,13 @@ Contains business logic and application controllers.
 
 from .credential import Credential
 from .vault import Vault, get_vault
-from .session_manager import (
+from .sessionManager import (
     SessionManager, 
     Session, 
     SessionState,
     get_session_manager
 )
-from .password_policy import (
+from .passwordPolicy import (
     PasswordPolicy,
     PasswordPolicyConfig,
     PasswordStrength,
