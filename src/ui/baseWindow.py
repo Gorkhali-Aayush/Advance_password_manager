@@ -31,6 +31,11 @@ class BaseWindow(ABC):
     DEFAULT_WIDTH = 800
     DEFAULT_HEIGHT = 600
     
+    @property
+    def COLORS(self) -> Dict[str, str]:
+        """Get theme colors from ThemeManager."""
+        return get_theme().COLORS
+    
     def __init__(self, parent: Optional[tk.Tk] = None,
                  title: str = "Password Manager",
                  width: int = DEFAULT_WIDTH,
